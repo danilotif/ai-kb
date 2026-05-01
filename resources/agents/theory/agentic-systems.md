@@ -1,6 +1,5 @@
 ---
 title: Agentic systems
-category: Agents
 date_added: 2026-04-20
 ---
 

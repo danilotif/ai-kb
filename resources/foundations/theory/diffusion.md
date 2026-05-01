@@ -1,6 +1,5 @@
 ---
 title: Diffusion models
-category: Foundations
 date_added: 2026-04-25
 ---
 

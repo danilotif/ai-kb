@@ -1,6 +1,5 @@
 ---
 title: Building MCP servers
-category: MCP
 date_added: 2026-04-29
 ---
 

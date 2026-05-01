@@ -1,6 +1,5 @@
 ---
 title: Transformers
-category: Foundations
 date_added: 2026-01-10
 ---
 

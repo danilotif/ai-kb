@@ -1,6 +1,5 @@
 ---
 title: Retrieval-Augmented Generation
-category: Retrieval
 date_added: 2026-03-20
 ---
 

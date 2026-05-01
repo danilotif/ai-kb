@@ -1,6 +1,5 @@
 ---
 title: Frontier model eval comparisons
-category: New models
 date_added: 2026-04-30
 ---
 

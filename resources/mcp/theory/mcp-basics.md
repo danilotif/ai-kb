@@ -1,6 +1,5 @@
 ---
 title: Model Context Protocol — basics
-category: MCP
 date_added: 2026-04-28
 ---
 

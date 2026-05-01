@@ -1,6 +1,5 @@
 ---
 title: Quantization (GGUF, GPTQ, AWQ)
-category: Local models
 date_added: 2026-04-26
 ---
 

@@ -1,6 +1,5 @@
 ---
 title: Caching & cost optimization
-category: Tips & tricks
 date_added: 2026-04-18
 ---
 

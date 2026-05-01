@@ -1,6 +1,5 @@
 ---
 title: Prompt engineering patterns
-category: Tips & tricks
 date_added: 2026-02-12
 ---
 

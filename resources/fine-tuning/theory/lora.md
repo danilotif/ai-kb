@@ -1,6 +1,5 @@
 ---
 title: LoRA & PEFT
-category: Fine-tuning
 date_added: 2026-04-02
 ---
 

@@ -1,6 +1,5 @@
 ---
 title: Claude 4.x family
-category: New models
 date_added: 2026-04-30
 ---
 

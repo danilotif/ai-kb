@@ -1,6 +1,5 @@
 ---
 title: Tokenization & BPE
-category: Foundations
 date_added: 2026-01-15
 ---
 
