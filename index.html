@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Program — Personal Dashboard</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-top">
+        <nav class="nav" id="nav">
+          <button class="nav-tab active" data-view="news">News</button>
+          <button class="nav-tab" data-view="topics">Topics</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section view" data-view="news">
+      <div class="section-head">
+        <h2>AI Briefing</h2>
+        <span class="muted" id="news-count"></span>
+      </div>
+      <div class="news" id="news"></div>
+    </section>
+
+    <section class="section view hidden" data-view="topics">
+      <div class="section-head">
+        <h2>Topics</h2>
+      </div>
+      <div class="grid" id="topics"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Static dashboard · edit <code>data/topics.js</code> and <code>data/news.js</code> to update</span>
+  </footer>
+
+  <script src="data/topics.js"></script>
+  <script src="data/news.js"></script>
+  <script src="assets/util.js"></script>
+  <script src="assets/topics.js"></script>
+  <script src="assets/briefing.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
