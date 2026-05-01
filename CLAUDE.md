@@ -28,14 +28,16 @@ That's the whole repo. Anything else (build artifacts, IDE configs, etc.) should
 ## frontend/ map
 ```
 frontend/
-  index.html                  page structure (hero + nav, news view, resources view with sidebar+content)
+  index.html                  page structure (hero + nav, news view, resources view with sidebar+content);
+                              uses data-config / data-config-html attrs as placeholders, populated from window.CONFIG on load
   assets/
     styles.css                dark theme, single stylesheet
     util.js                   window.App.el — small DOM helper
     resources.js              window.App.resources — file-tree sidebar, hash routing, minimal markdown→HTML renderer
     briefing.js               window.App.briefing — render the synthesized news briefing
-    app.js                    nav (tabs + pushState/popstate) and DOMContentLoaded bootstrap
+    app.js                    config application + nav (tabs + pushState/popstate) + DOMContentLoaded bootstrap
   data/
+    config.js                 DOMAIN-SPECIFIC settings (window.CONFIG): site name, page title, tab labels, footer
     resources.js              GENERATED KB index (window.RESOURCES) — tree + content baked in for file:// support
     news.js                   news stories (window.NEWS) — manual + auto entries
   scripts/
@@ -65,7 +67,7 @@ date_added: YYYY-MM-DD
 _(your notes here)_
 ```
 
-Categories are recognized only if their slug appears in `CATEGORY_NAMES` in `frontend/scripts/build-resources.py`. Adding a new category = add an entry to that dict, then create the directory.
+Categories are auto-discovered from `resources/*/` directory listings. Display names default to a slugified-back version (`local-models` → `Local models`); to override (e.g. `mcp` → `MCP`, `tips-and-tricks` → `Tips & tricks`), edit `resources/_categories.json`. Directories whose name starts with `.` or `_` are ignored, so the override file is invisible to the dashboard.
 
 After editing any `resources/*.md`, regenerate the index from the repo root:
 
@@ -116,5 +118,15 @@ The minimal markdown subset rendered by `frontend/assets/resources.js` covers `#
 ## Conventions
 - KB documents are edited as markdown under `resources/`. After editing, run `python3 frontend/scripts/build-resources.py`.
 - News is hand-edited in `frontend/data/news.js` for manual entries; auto entries come from `/update-news`.
-- Adding a new category = add slug → display-name to `CATEGORY_NAMES` in `frontend/scripts/build-resources.py`, then create the directory.
+- Adding a new category = `mkdir resources/<slug>/`. Auto-discovered on next build. Override the display name in `resources/_categories.json` if the slug doesn't title-case nicely.
 - The `slug` shown in the sidebar is the filename stem (e.g. `transformers.md` → `transformers`), so name files for what they should display.
+
+## Forking this for a new domain
+The framework (`frontend/`, build script, KB tree viewer) is domain-agnostic. To repurpose for marketing/games/finance/anything:
+1. Edit `frontend/data/config.js` — set `siteName`, `pageTitle`, tab labels and headings, footer.
+2. Replace `resources/*/` content with your domain's markdown.
+3. Update `resources/_categories.json` if your slugs need pretty display names.
+4. Rewrite `.claude/commands/update-news.md` for your domain (or add a new command, e.g. `/update-trends`) — change the source list and theme slots; the rest of the workflow (synthesize themed stories, write to `frontend/data/news.js`) stays the same.
+5. Run `python3 frontend/scripts/build-resources.py`.
+
+Nothing else in the framework should need editing.

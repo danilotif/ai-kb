@@ -8,6 +8,15 @@ loads as a regular <script> tag (so it works under file:// without fetch).
 Run from the repo root after editing any markdown:
 
     python3 frontend/scripts/build-resources.py
+
+Categories are auto-discovered from `resources/*/` directory listings. The
+display name is derived from the slug ("local-models" -> "Local models")
+unless overridden in the optional `resources/_categories.json` map. That
+file is plain JSON keyed by slug:
+
+    { "mcp": "MCP", "tips-and-tricks": "Tips & tricks" }
+
+Anything not listed there falls back to the auto-derived name.
 """
 import json
 import re
@@ -18,19 +27,7 @@ FRONTEND = SCRIPT.parent.parent       # frontend/
 ROOT = FRONTEND.parent                # repo root
 RESOURCES = ROOT / "resources"
 OUT = FRONTEND / "data" / "resources.js"
-
-CATEGORY_NAMES = {
-    "foundations": "Foundations",
-    "fine-tuning": "Fine-tuning",
-    "retrieval": "Retrieval",
-    "agents": "Agents",
-    "mcp": "MCP",
-    "local-models": "Local models",
-    "new-models": "New models",
-    "evaluation": "Evaluation",
-    "tips-and-tricks": "Tips & tricks",
-}
-CATEGORY_ORDER = list(CATEGORY_NAMES.keys())
+CATEGORY_OVERRIDES = RESOURCES / "_categories.json"
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n", re.DOTALL)
 H1_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
@@ -54,14 +51,35 @@ def parse_h1(body: str) -> str:
     return m.group(1).strip() if m else "(untitled)"
 
 
+def auto_name(slug: str) -> str:
+    """Slug -> display name. 'local-models' -> 'Local models'."""
+    parts = slug.replace("_", "-").split("-")
+    if not parts:
+        return slug
+    return " ".join([parts[0].capitalize()] + [p.lower() for p in parts[1:]])
+
+
+def load_overrides() -> dict:
+    if not CATEGORY_OVERRIDES.is_file():
+        return {}
+    try:
+        return json.loads(CATEGORY_OVERRIDES.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise SystemExit(f"Invalid JSON in {CATEGORY_OVERRIDES.relative_to(ROOT)}: {e}")
+
+
 def main():
+    overrides = load_overrides()
     categories = []
     total_files = 0
     if RESOURCES.is_dir():
-        for slug in CATEGORY_ORDER:
+        slugs = sorted(
+            d.name for d in RESOURCES.iterdir()
+            if d.is_dir() and not d.name.startswith((".", "_"))
+        )
+        for slug in slugs:
             d = RESOURCES / slug
-            if not d.is_dir():
-                continue
+            display = overrides.get(slug, auto_name(slug))
             files = []
             for fp in sorted(d.glob("*.md")):
                 text = fp.read_text(encoding="utf-8")
@@ -70,13 +88,13 @@ def main():
                     "path": f"{slug}/{fp.name}",
                     "slug": fp.stem,
                     "title": parse_h1(body),
-                    "category": fm.get("category", CATEGORY_NAMES[slug]),
+                    "category": fm.get("category", display),
                     "date_added": fm.get("date_added", ""),
                     "content": body.strip(),
                 })
             files.sort(key=lambda f: f["title"].lower())
             if files:
-                categories.append({"slug": slug, "name": CATEGORY_NAMES[slug], "files": files})
+                categories.append({"slug": slug, "name": display, "files": files})
                 total_files += len(files)
 
     payload = json.dumps({"categories": categories}, indent=2, ensure_ascii=False)

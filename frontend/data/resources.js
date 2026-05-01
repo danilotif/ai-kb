@@ -4,6 +4,56 @@
 window.RESOURCES = {
   "categories": [
     {
+      "slug": "agents",
+      "name": "Agents",
+      "files": [
+        {
+          "path": "agents/agentic-systems.md",
+          "slug": "agentic-systems",
+          "title": "Agentic systems",
+          "category": "Agents",
+          "date_added": "2026-04-20",
+          "content": "# Agentic systems\n\nTool use, planning loops, multi-step reasoning, agent frameworks.\n\n## Resources\n\n- [Building effective agents](https://www.anthropic.com/research/building-effective-agents)\n\n## Notes\n\n_(none yet)_"
+        }
+      ]
+    },
+    {
+      "slug": "evaluation",
+      "name": "Evaluation",
+      "files": [
+        {
+          "path": "evaluation/evals-design.md",
+          "slug": "evals-design",
+          "title": "Designing reliable evals",
+          "category": "Evaluation",
+          "date_added": "2026-04-22",
+          "content": "# Designing reliable evals\n\nCommon pitfalls, eval-driven development, golden sets vs. LLM-as-judge.\n\n## Notes\n\n_(none yet)_"
+        }
+      ]
+    },
+    {
+      "slug": "fine-tuning",
+      "name": "Fine-tuning",
+      "files": [
+        {
+          "path": "fine-tuning/lora.md",
+          "slug": "lora",
+          "title": "LoRA & PEFT",
+          "category": "Fine-tuning",
+          "date_added": "2026-04-02",
+          "content": "# LoRA & PEFT\n\nLow-rank adapters, parameter-efficient fine-tuning techniques.\n\n## Resources\n\n- [LoRA paper](https://arxiv.org/abs/2106.09685)\n\n## Notes\n\n_(none yet)_"
+        },
+        {
+          "path": "fine-tuning/rlhf.md",
+          "slug": "rlhf",
+          "title": "RLHF & DPO",
+          "category": "Fine-tuning",
+          "date_added": "2026-04-15",
+          "content": "# RLHF & DPO\n\nReward modeling, PPO for language models, direct preference optimization.\n\n## Resources\n\n- [DPO paper](https://arxiv.org/abs/2305.18290)\n\n## Notes\n\n_(none yet)_"
+        }
+      ]
+    },
+    {
       "slug": "foundations",
       "name": "Foundations",
       "files": [
@@ -34,52 +84,24 @@ window.RESOURCES = {
       ]
     },
     {
-      "slug": "fine-tuning",
-      "name": "Fine-tuning",
+      "slug": "local-models",
+      "name": "Local models",
       "files": [
         {
-          "path": "fine-tuning/lora.md",
-          "slug": "lora",
-          "title": "LoRA & PEFT",
-          "category": "Fine-tuning",
-          "date_added": "2026-04-02",
-          "content": "# LoRA & PEFT\n\nLow-rank adapters, parameter-efficient fine-tuning techniques.\n\n## Resources\n\n- [LoRA paper](https://arxiv.org/abs/2106.09685)\n\n## Notes\n\n_(none yet)_"
+          "path": "local-models/ollama.md",
+          "slug": "ollama",
+          "title": "Ollama & local inference",
+          "category": "Local models",
+          "date_added": "2026-04-25",
+          "content": "# Ollama & local inference\n\nRunning open-weight models locally, model registry, GPU/CPU options.\n\n## Resources\n\n- [Ollama](https://ollama.com)\n\n## Notes\n\n_(none yet)_"
         },
         {
-          "path": "fine-tuning/rlhf.md",
-          "slug": "rlhf",
-          "title": "RLHF & DPO",
-          "category": "Fine-tuning",
-          "date_added": "2026-04-15",
-          "content": "# RLHF & DPO\n\nReward modeling, PPO for language models, direct preference optimization.\n\n## Resources\n\n- [DPO paper](https://arxiv.org/abs/2305.18290)\n\n## Notes\n\n_(none yet)_"
-        }
-      ]
-    },
-    {
-      "slug": "retrieval",
-      "name": "Retrieval",
-      "files": [
-        {
-          "path": "retrieval/rag.md",
-          "slug": "rag",
-          "title": "Retrieval-Augmented Generation",
-          "category": "Retrieval",
-          "date_added": "2026-03-20",
-          "content": "# Retrieval-Augmented Generation\n\nEmbeddings, vector stores, retrieval pipelines, reranking.\n\n## Resources\n\n- [Anthropic — Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval)\n\n## Notes\n\n_(none yet)_"
-        }
-      ]
-    },
-    {
-      "slug": "agents",
-      "name": "Agents",
-      "files": [
-        {
-          "path": "agents/agentic-systems.md",
-          "slug": "agentic-systems",
-          "title": "Agentic systems",
-          "category": "Agents",
-          "date_added": "2026-04-20",
-          "content": "# Agentic systems\n\nTool use, planning loops, multi-step reasoning, agent frameworks.\n\n## Resources\n\n- [Building effective agents](https://www.anthropic.com/research/building-effective-agents)\n\n## Notes\n\n_(none yet)_"
+          "path": "local-models/quantization.md",
+          "slug": "quantization",
+          "title": "Quantization (GGUF, GPTQ, AWQ)",
+          "category": "Local models",
+          "date_added": "2026-04-26",
+          "content": "# Quantization (GGUF, GPTQ, AWQ)\n\nWeight quantization formats and trade-offs for local inference.\n\n## Notes\n\n_(none yet)_"
         }
       ]
     },
@@ -106,28 +128,6 @@ window.RESOURCES = {
       ]
     },
     {
-      "slug": "local-models",
-      "name": "Local models",
-      "files": [
-        {
-          "path": "local-models/ollama.md",
-          "slug": "ollama",
-          "title": "Ollama & local inference",
-          "category": "Local models",
-          "date_added": "2026-04-25",
-          "content": "# Ollama & local inference\n\nRunning open-weight models locally, model registry, GPU/CPU options.\n\n## Resources\n\n- [Ollama](https://ollama.com)\n\n## Notes\n\n_(none yet)_"
-        },
-        {
-          "path": "local-models/quantization.md",
-          "slug": "quantization",
-          "title": "Quantization (GGUF, GPTQ, AWQ)",
-          "category": "Local models",
-          "date_added": "2026-04-26",
-          "content": "# Quantization (GGUF, GPTQ, AWQ)\n\nWeight quantization formats and trade-offs for local inference.\n\n## Notes\n\n_(none yet)_"
-        }
-      ]
-    },
-    {
       "slug": "new-models",
       "name": "New models",
       "files": [
@@ -150,16 +150,16 @@ window.RESOURCES = {
       ]
     },
     {
-      "slug": "evaluation",
-      "name": "Evaluation",
+      "slug": "retrieval",
+      "name": "Retrieval",
       "files": [
         {
-          "path": "evaluation/evals-design.md",
-          "slug": "evals-design",
-          "title": "Designing reliable evals",
-          "category": "Evaluation",
-          "date_added": "2026-04-22",
-          "content": "# Designing reliable evals\n\nCommon pitfalls, eval-driven development, golden sets vs. LLM-as-judge.\n\n## Notes\n\n_(none yet)_"
+          "path": "retrieval/rag.md",
+          "slug": "rag",
+          "title": "Retrieval-Augmented Generation",
+          "category": "Retrieval",
+          "date_added": "2026-03-20",
+          "content": "# Retrieval-Augmented Generation\n\nEmbeddings, vector stores, retrieval pipelines, reranking.\n\n## Resources\n\n- [Anthropic — Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval)\n\n## Notes\n\n_(none yet)_"
         }
       ]
     },

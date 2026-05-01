@@ -43,7 +43,7 @@ Then regenerate the index so the dashboard sees the new file:
 python3 frontend/scripts/build-resources.py
 ```
 
-Categories are recognized from `CATEGORY_NAMES` in that script — add new ones there before creating their directory.
+Categories are auto-discovered from the directory listing under `resources/`. Display names default to title-case-from-slug; override pretty names (`mcp` → `MCP`) in `resources/_categories.json`.
 
 ## Refresh the news
 
@@ -61,10 +61,12 @@ The command spec lives at `.claude/commands/update-news.md`.
 
 ```
 resources/                          knowledge base — markdown source of truth
+  _categories.json                  optional slug → display-name overrides (e.g. mcp → MCP)
 frontend/                           static dashboard
   index.html
   assets/                           styles + JS modules
   data/
+    config.js                       domain-specific settings (site name, tabs, footer)
     resources.js                    generated KB index (do not edit by hand)
     news.js                         hand- and auto-curated news briefing
   scripts/
@@ -73,6 +75,17 @@ frontend/                           static dashboard
 CLAUDE.md                           project notes for Claude (architecture, conventions)
 README.md                           this file
 ```
+
+## Forking for a new domain
+
+This pattern works for anything where you want AI-curated updates + a markdown knowledge base (marketing, games, finance, hobbies). To repurpose:
+
+1. Edit `frontend/data/config.js` — site name, page title, tab labels, footer.
+2. Replace `resources/*/` content with your domain's markdown. Add categories with `mkdir resources/<slug>/`; override pretty display names in `resources/_categories.json`.
+3. Rewrite `.claude/commands/update-news.md` for your domain (or add `/update-trends`, `/update-patches`, etc.) — change the source list and theme slots.
+4. Run `python3 frontend/scripts/build-resources.py`.
+
+Nothing else in the framework needs editing — categories are auto-discovered, the markdown viewer is generic, and the briefing tab just renders whatever's in `frontend/data/news.js`.
 
 ## Hosting
 
