@@ -12,6 +12,7 @@
       <div class="hero-top">
         <nav class="nav" id="nav">
           <button class="nav-tab active" data-view="news">News</button>
+          <button class="nav-tab" data-view="resources">Knowledge Base</button>
           <button class="nav-tab" data-view="topics">Topics</button>
         </nav>
       </div>
@@ -25,6 +26,21 @@
         <span class="muted" id="news-count"></span>
       </div>
       <div class="news" id="news"></div>
+    </section>
+
+    <section class="section view hidden full-bleed" data-view="resources">
+      <div class="resources-layout">
+        <aside class="resources-sidebar">
+          <div class="resources-sidebar-head">
+            <h2>Knowledge Base</h2>
+            <span class="muted" id="resources-count"></span>
+          </div>
+          <nav id="resources-tree" class="resources-tree"></nav>
+        </aside>
+        <main class="resources-main">
+          <div id="resources-content" class="resources-content"></div>
+        </main>
+      </div>
     </section>
 
     <section class="section view hidden" data-view="topics">
@@ -41,9 +57,11 @@
 
   <script src="data/topics.js"></script>
   <script src="data/news.js"></script>
+  <script src="data/resources.js"></script>
   <script src="assets/util.js"></script>
   <script src="assets/topics.js"></script>
   <script src="assets/briefing.js"></script>
+  <script src="assets/resources.js"></script>
   <script src="assets/app.js"></script>
 </body>
 </html>

@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  const VALID_VIEWS = new Set(["news", "topics", "resources"]);
+
+  function viewFromHash() {
+    const first = location.hash.replace(/^#/, "").split("/")[0];
+    return VALID_VIEWS.has(first) ? first : "news";
+  }
+
   function setView(name) {
     document.querySelectorAll(".nav-tab").forEach((t) => {
       t.classList.toggle("active", t.dataset.view === name);
@@ -8,29 +15,34 @@
     document.querySelectorAll(".view").forEach((v) => {
       v.classList.toggle("hidden", v.dataset.view !== name);
     });
-    if (location.hash.replace("#", "") !== name) {
-      history.replaceState(null, "", name === "news" ? location.pathname : "#" + name);
+    document.body.classList.toggle("view-resources", name === "resources");
+  }
+
+  function applyHash() {
+    const view = viewFromHash();
+    setView(view);
+    if (view === "resources") {
+      window.App.resources.selectByHash();
     }
   }
 
   function bindNav() {
-    const nav = document.getElementById("nav");
-    nav.addEventListener("click", (e) => {
+    document.getElementById("nav").addEventListener("click", (e) => {
       const btn = e.target.closest(".nav-tab");
       if (!btn) return;
-      setView(btn.dataset.view);
+      const target = btn.dataset.view;
+      const newUrl = target === "news" ? location.pathname : "#" + target;
+      history.pushState(null, "", newUrl);
+      applyHash();
     });
-    window.addEventListener("popstate", () => {
-      const h = location.hash.replace("#", "");
-      setView(h === "topics" ? "topics" : "news");
-    });
+    window.addEventListener("popstate", applyHash);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     window.App.topics.render();
     window.App.briefing.render();
+    window.App.resources.render();
     bindNav();
-    const initial = location.hash.replace("#", "");
-    setView(initial === "topics" ? "topics" : "news");
+    applyHash();
   });
 })();

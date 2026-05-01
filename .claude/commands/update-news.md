@@ -81,7 +81,44 @@ Refresh `data/news.js` with a fresh, **synthesized** AI-news briefing — themed
    ];
    ```
 
-7. **Report back** to the user: how many manual stories preserved, how many new auto stories written, the theme of each, and the total source count. List the new headlines as bullets.
+7. **Mirror each new auto story into `resources/`** as a permanent KB file. For every freshly written auto story, create `resources/<theme-slug>/YYYY-MM-DD-short-slug.md` with this shape:
+
+   ```markdown
+   ---
+   date: YYYY-MM-DD
+   theme: <macro theme name, e.g. "Frontier model releases">
+   auto: true
+   ---
+
+   # <Headline without trailing period>
+
+   <body prose, identical to data/news.js>
+
+   ## Sources
+
+   - [<title>](<url>) — <source>
+   ```
+
+   Theme directories:
+   - `frontier-models/` — closed-weights flagships
+   - `open-weights/` — open-source / open-weights releases
+   - `agents-and-tooling/` — MCP, agents, frameworks, computer-use
+   - `business-and-infra/` — capex, M&A, partnerships, infra
+   - `policy-and-safety/` — regulation, safety incidents
+   - `research-and-evals/` — arXiv, benchmarks
+   - `products-and-features/` — consumer ships (create dir if needed)
+
+   Filename slug: lowercase, hyphen-separated, derived from the headline; date prefix matches frontmatter date. Do not delete or modify existing files in `resources/` — even if a prior auto story is being discarded from `data/news.js`, its mirror in `resources/` stays as part of the archive.
+
+8. **Regenerate the KB index** so the new files show up in the Knowledge Base view of the dashboard:
+
+   ```
+   python3 scripts/build-resources.py
+   ```
+
+   This rewrites `data/resources.js`. The dashboard reads from there (it can't fetch markdown directly under `file://`).
+
+9. **Report back** to the user: how many manual stories preserved, how many new auto stories written, the theme of each, the total source count, and the list of new files added under `resources/`. List the new headlines as bullets.
 
 ## Rules
 

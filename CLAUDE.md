@@ -6,25 +6,53 @@ A personal, static dashboard for tracking AI knowledge: topics known, topics que
 ## Architecture
 - **Static HTML** — no build step, no dependencies, no framework. Open `index.html` directly or serve it.
 - **Data lives in JS files** (`data/topics.js`, `data/news.js`) that assign to `window.TOPICS` / `window.NEWS`. Chosen over JSON to avoid CORS issues when opening from `file://`.
-- **Two views, navbar-switched**: "News" (briefing) and "Topics". The navbar lives in the hero; only one section is visible at a time. Default view is News; deep-linkable via `#topics` (News uses bare URL) and synced with browser back/forward via `popstate`.
+- **Three views, navbar-switched**: "News" (synthesized briefing), "Knowledge Base" (sidebar tree of markdown files in `resources/`), and "Topics". The navbar lives in the hero; only one section is visible at a time. Default view is News. Deep-linkable: `#topics`, `#resources`, and `#resources/<theme>/<slug>` for a specific KB page; News uses the bare URL. Routing is hash-based with `pushState` + `popstate` for back/forward support.
 - **Code split into IIFE modules** under `window.App`. Each script is loaded via a separate `<script>` tag in `index.html`; load order matters (util → topics/briefing → app). No build step, no module loader.
 - **News refresh** via Claude Code slash command `/update-news` (see `.claude/commands/update-news.md`) — reads the web broadly (lab blogs, tech press, newsletters, arXiv, HN), synthesizes 4–8 themed stories spanning model releases, products/features, agents/tooling, research/evals, business/infra, and policy/safety, and rewrites `data/news.js` locally before push. Primary sources are preferred for citations; press is used for cross-cutting themes. Prior auto stories are discarded each run; manual stories are preserved.
 
 ## File map
 ```
-index.html                    page structure (hero + nav, news view, topics view)
+index.html                    page structure (hero + nav, news / resources / topics views)
 assets/styles.css             dark theme, single stylesheet
 assets/util.js                exposes window.App.el() — small DOM helper, shared by other modules
 assets/topics.js              window.App.topics — group by category and render topic cards
 assets/briefing.js            window.App.briefing — render the synthesized news briefing (with old-schema fallback)
-assets/app.js                 nav (tabs + URL hash + popstate) and DOMContentLoaded bootstrap
+assets/resources.js           window.App.resources — sidebar tree, file routing, minimal markdown→HTML renderer
+assets/app.js                 nav (tabs + URL hash + popstate/pushState) and DOMContentLoaded bootstrap
 data/topics.js                hand-edited topic list (window.TOPICS)
 data/news.js                  news stories (window.NEWS) — manual + auto entries
+data/resources.js             generated KB index (window.RESOURCES) — tree + content baked in for file:// support
+resources/                    persistent KB mirror of news stories, organized by macro theme (one md file per story)
+scripts/build-resources.py    regenerates data/resources.js by scanning resources/*.md (no deps, just stdlib)
 .claude/commands/update-news.md  /update-news slash command spec
 README.md                     user-facing intro
 .gitignore                    ignores .superpowers/ brainstorming artifacts
 CLAUDE.md                     this file
 ```
+
+## resources/ knowledge base
+Each story in `data/news.js` is also mirrored as a markdown file under
+`resources/<theme>/YYYY-MM-DD-slug.md`. The mirror is the **source of truth**
+for the Knowledge Base view in the dashboard — but because the dashboard runs
+from `file://` (no server), the markdown can't be `fetch()`-ed at runtime.
+Instead, `scripts/build-resources.py` walks `resources/`, parses frontmatter
++ H1, and bakes the entire tree (including raw markdown content per file)
+into `data/resources.js`, which is loaded as a regular `<script>` tag. Run
+the script after any edit under `resources/`:
+
+    python3 scripts/build-resources.py
+
+Theme slots: `frontier-models/`, `open-weights/`, `agents-and-tooling/`,
+`business-and-infra/`, `policy-and-safety/`, `research-and-evals/`. A
+`products-and-features/` slot is reserved — create the directory the first
+time it has content. The KB view picks up new themes automatically as long
+as the slug appears in `THEME_NAMES` in `build-resources.py`. See
+`resources/README.md` for the file format.
+
+The minimal markdown subset rendered by `assets/resources.js` covers what
+`/update-news`-generated stories use: `# H1`, `## H2`, paragraphs, unordered
+lists with `- `, links, inline code, and bold. Tables, blockquotes, images,
+and ordered lists are not rendered — extend `renderMarkdown` if needed.
 
 ## Data shapes
 
