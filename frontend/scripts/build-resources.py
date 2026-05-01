@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Generate frontend/data/resources.js from the markdown files under resources/.
 
-Source of truth is resources/<category>/<slug>.md (one level up from
-frontend/). This script walks that tree, extracts frontmatter + H1 + body,
-and bakes everything into frontend/data/resources.js which the dashboard
-loads as a regular <script> tag (so it works under file:// without fetch).
-Run from the repo root after editing any markdown:
+Source of truth is resources/<category>/<kind>/<slug>.md, where <kind> is
+either `theory` or `practice`. This script walks that tree, extracts
+frontmatter + H1 + body, and bakes everything into frontend/data/resources.js
+which the dashboard loads as a regular <script> tag (so it works under file://
+without fetch). Run from the repo root after editing any markdown:
 
     python3 frontend/scripts/build-resources.py
 
@@ -28,6 +28,8 @@ ROOT = FRONTEND.parent                # repo root
 RESOURCES = ROOT / "resources"
 OUT = FRONTEND / "data" / "resources.js"
 CATEGORY_OVERRIDES = RESOURCES / "_categories.json"
+
+KINDS = ("theory", "practice")
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n", re.DOTALL)
 H1_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
@@ -68,6 +70,19 @@ def load_overrides() -> dict:
         raise SystemExit(f"Invalid JSON in {CATEGORY_OVERRIDES.relative_to(ROOT)}: {e}")
 
 
+def read_doc(fp: Path, slug: str, kind: str) -> dict:
+    text = fp.read_text(encoding="utf-8")
+    fm, body = parse_frontmatter(text)
+    return {
+        "path": f"{slug}/{kind}/{fp.name}",
+        "slug": fp.stem,
+        "kind": kind,
+        "title": parse_h1(body),
+        "date_added": fm.get("date_added", ""),
+        "content": body.strip(),
+    }
+
+
 def main():
     overrides = load_overrides()
     categories = []
@@ -81,18 +96,12 @@ def main():
             d = RESOURCES / slug
             display = overrides.get(slug, auto_name(slug))
             files = []
-            for fp in sorted(d.glob("*.md")):
-                text = fp.read_text(encoding="utf-8")
-                fm, body = parse_frontmatter(text)
-                files.append({
-                    "path": f"{slug}/{fp.name}",
-                    "slug": fp.stem,
-                    "title": parse_h1(body),
-                    "category": fm.get("category", display),
-                    "date_added": fm.get("date_added", ""),
-                    "content": body.strip(),
-                })
-            files.sort(key=lambda f: f["title"].lower())
+            for kind in KINDS:
+                kdir = d / kind
+                if kdir.is_dir():
+                    for fp in sorted(kdir.glob("*.md")):
+                        files.append(read_doc(fp, slug, kind))
+            files.sort(key=lambda f: (f["kind"], f["title"].lower()))
             if files:
                 categories.append({"slug": slug, "name": display, "files": files})
                 total_files += len(files)

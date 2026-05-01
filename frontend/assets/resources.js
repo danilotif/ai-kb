@@ -99,8 +99,22 @@
   function ensureCurrentExpanded() {
     expanded.add("resources");
     if (currentPath) {
-      expanded.add("resources/" + currentPath.split("/")[0]);
+      const parts = currentPath.split("/");
+      // path = <category>/<kind>/<file.md>
+      if (parts.length >= 1) expanded.add("resources/" + parts[0]);
+      if (parts.length >= 2) expanded.add("resources/" + parts[0] + "/" + parts[1]);
     }
+  }
+
+  const KIND_ORDER = ["theory", "practice"];
+
+  function groupByKind(files) {
+    const groups = {};
+    for (const f of files) {
+      const k = f.kind || "theory";
+      (groups[k] = groups[k] || []).push(f);
+    }
+    return groups;
   }
 
   // ---------- sidebar ----------
@@ -160,9 +174,30 @@
       const catKey = "resources/" + cat.slug;
       const catOpen = expanded.has(catKey);
       const catRow = folderRow(catKey, cat.slug, catOpen);
-      const children = catOpen
-        ? el("div", { class: "tree-children" }, cat.files.map(fileRow))
-        : null;
+      let children = null;
+      if (catOpen) {
+        const groups = groupByKind(cat.files);
+        const presentKinds = KIND_ORDER.filter((k) => groups[k] && groups[k].length);
+        if (presentKinds.length <= 1) {
+          // single-kind category: skip the kind wrapper for less clicking
+          children = el("div", { class: "tree-children" }, cat.files.map(fileRow));
+        } else {
+          const kindNodes = presentKinds.map((k) => {
+            const kindKey = catKey + "/" + k;
+            const kindOpen = expanded.has(kindKey);
+            const kindRow = folderRow(kindKey, k, kindOpen);
+            const kindChildren = kindOpen
+              ? el("div", { class: "tree-children" }, groups[k].map(fileRow))
+              : null;
+            return el(
+              "div",
+              { class: "tree-folder" + (kindOpen ? " open" : "") },
+              kindChildren ? [kindRow, kindChildren] : [kindRow]
+            );
+          });
+          children = el("div", { class: "tree-children" }, kindNodes);
+        }
+      }
       return el(
         "div",
         { class: "tree-folder" + (catOpen ? " open" : "") },

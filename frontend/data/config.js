@@ -10,7 +10,7 @@ window.CONFIG = {
   siteName: "AI Program",
   pageTitle: "AI Program — Personal Dashboard",
   tabs: {
-    news: { label: "News", heading: "AI Briefing" },
+    news: { label: "News" },
     resources: { label: "Knowledge Base", heading: "Knowledge Base" },
   },
   footerHtml:

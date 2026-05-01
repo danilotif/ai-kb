@@ -17,11 +17,11 @@ README.md         user-facing intro
 That's the whole repo. Anything else (build artifacts, IDE configs, etc.) should be gitignored.
 
 ## Architecture
-- **Static HTML** at serve time — no dependencies, no framework. Open `frontend/index.html` directly or serve `frontend/` with any static host. There is one offline build step (`frontend/scripts/build-resources.py`) that converts `resources/*.md` into `frontend/data/resources.js` so the dashboard can read it under `file://`; the user runs this manually after editing markdown.
+- **Static HTML** at serve time — no dependencies, no framework. Open `frontend/index.html` directly or serve `frontend/` with any static host. There is one offline build step (`frontend/scripts/build-resources.py`) that converts the `resources/` markdown tree into `frontend/data/resources.js` so the dashboard can read it under `file://`; the user runs this manually after editing markdown.
 - **Two views, navbar-switched**:
   - **News** (default): synthesized briefing rendered from `frontend/data/news.js`.
-  - **Knowledge Base**: a sidebar file-tree (folders = categories, files = study documents) with the selected document's markdown rendered in the main pane.
-- **Routing**: hash-based with `pushState`/`popstate`. URL forms: `` (news), `#resources`, `#resources/<category-slug>/<file-slug>` (deep link to a specific document).
+  - **Knowledge Base**: a sidebar file-tree (category → theory|practice → documents) with the selected document's markdown rendered in the main pane.
+- **Routing**: hash-based with `pushState`/`popstate`. URL forms: `` (news), `#resources`, `#resources/<category-slug>/<kind>/<file-slug>` where `<kind>` is `theory` or `practice` (deep link to a specific document).
 - **Code split into IIFE modules** under `window.App`, loaded via plain `<script>` tags in load order: util → resources/briefing → app.
 - **News refresh** via `/update-news` slash command (see `.claude/commands/update-news.md`) — Claude reads the web, synthesizes 4–8 themed stories, and rewrites `frontend/data/news.js`. Manual stories are preserved; auto stories are discarded each run. News does **not** mirror into `resources/` — news and KB are separate concerns.
 
@@ -41,11 +41,11 @@ frontend/
     resources.js              GENERATED KB index (window.RESOURCES) — tree + content baked in for file:// support
     news.js                   news stories (window.NEWS) — manual + auto entries
   scripts/
-    build-resources.py        regenerates frontend/data/resources.js by scanning ../resources/*.md (stdlib only)
+    build-resources.py        regenerates frontend/data/resources.js by scanning ../resources/<cat>/<theory|practice>/*.md (stdlib only)
 ```
 
 ## resources/ knowledge base
-The `resources/` folder is the source of truth. Each file is a long-form study document with frontmatter:
+The `resources/` folder is the source of truth. Layout is `resources/<category>/<kind>/<slug>.md` where `<kind>` is `theory` or `practice`. Each file is a long-form study document with frontmatter:
 
 ```markdown
 ---
@@ -69,7 +69,9 @@ _(your notes here)_
 
 Categories are auto-discovered from `resources/*/` directory listings. Display names default to a slugified-back version (`local-models` → `Local models`); to override (e.g. `mcp` → `MCP`, `tips-and-tricks` → `Tips & tricks`), edit `resources/_categories.json`. Directories whose name starts with `.` or `_` are ignored, so the override file is invisible to the dashboard.
 
-After editing any `resources/*.md`, regenerate the index from the repo root:
+Inside each category, the build script only walks `theory/` and `practice/` subfolders. Files placed at the category root (e.g. `resources/agents/foo.md`) still get picked up but are treated as `theory` with a stderr warning — move them into the right subfolder to silence it. The current categories (17 in total): `agents`, `coding-agents`, `data`, `evaluation`, `fine-tuning`, `foundations`, `local-models`, `mcp`, `multimodal`, `new-models`, `policy`, `prompt-engineering`, `reasoning`, `retrieval`, `safety`, `serving`, `tips-and-tricks`. New categories started 2026-05-01 (`coding-agents`, `data`, `multimodal`, `policy`, `prompt-engineering`, `reasoning`, `safety`, `serving`) ship with a single `theory/overview.md` placeholder for the user to expand.
+
+After editing any markdown in `resources/`, regenerate the index from the repo root:
 
     python3 frontend/scripts/build-resources.py
 
@@ -98,7 +100,7 @@ The minimal markdown subset rendered by `frontend/assets/resources.js` covers `#
 - JS data files over JSON — avoids needing a local server.
 - Dark theme only.
 - News and KB are separate concerns: news is ephemeral (refreshed on demand, replaces auto entries), KB documents are durable study pages you accumulate over time.
-- Single-level hierarchy (category → document). Can deepen later if needed.
+- Two-level hierarchy: category → theory|practice → document. Theory holds explanatory/reference notes; practice holds recipes, commands, and how-to docs. The split is enforced by the build script.
 - Top level is intentionally minimal: `resources/`, `frontend/`, `CLAUDE.md`, `README.md`. New top-level entries should be a deliberate decision, not accidental sprawl.
 
 ## /update-news workflow
@@ -111,15 +113,19 @@ The minimal markdown subset rendered by `frontend/assets/resources.js` covers `#
 
 ## Backlog / not yet done
 - No search box (across the KB or news).
-- No sub-categories under categories (single-level only).
+- Two-level hierarchy only (category → theory|practice → document). Going deeper would require changes in the build script and the sidebar renderer.
+- Several new categories are stubs (`coding-agents`, `data`, `multimodal`, `policy`, `prompt-engineering`, `reasoning`, `safety`, `serving`) — only contain a placeholder `theory/overview.md`. Fill with study content over time.
+- `prompt-engineering` overlaps with `tips-and-tricks/practice/prompt-patterns.md`; consider moving the file into `prompt-engineering/practice/` once it grows.
+- `new-models/theory/frontier-evals.md` overlaps with `evaluation/`; consider consolidating.
 - No tests.
 - `/update-news` is unscheduled — runs only on demand.
 
 ## Conventions
-- KB documents are edited as markdown under `resources/`. After editing, run `python3 frontend/scripts/build-resources.py`.
+- KB documents are edited as markdown under `resources/<category>/<theory|practice>/<slug>.md`. After editing, run `python3 frontend/scripts/build-resources.py`.
 - News is hand-edited in `frontend/data/news.js` for manual entries; auto entries come from `/update-news`.
-- Adding a new category = `mkdir resources/<slug>/`. Auto-discovered on next build. Override the display name in `resources/_categories.json` if the slug doesn't title-case nicely.
+- Adding a new category = `mkdir -p resources/<slug>/{theory,practice}` and drop at least one `.md` file into one of them (otherwise the category won't appear in the sidebar). Override the display name in `resources/_categories.json` if the slug doesn't title-case nicely.
 - The `slug` shown in the sidebar is the filename stem (e.g. `transformers.md` → `transformers`), so name files for what they should display.
+- Decide theory vs practice by audience need: theory = "I want to understand X" (concepts, derivations, reference). Practice = "I want to do X" (commands, recipes, workflows, tool how-tos).
 
 ## Forking this for a new domain
 The framework (`frontend/`, build script, KB tree viewer) is domain-agnostic. To repurpose for marketing/games/finance/anything:

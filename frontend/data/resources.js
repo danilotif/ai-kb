@@ -8,12 +8,40 @@ window.RESOURCES = {
       "name": "Agents",
       "files": [
         {
-          "path": "agents/agentic-systems.md",
+          "path": "agents/theory/agentic-systems.md",
           "slug": "agentic-systems",
+          "kind": "theory",
           "title": "Agentic systems",
-          "category": "Agents",
           "date_added": "2026-04-20",
           "content": "# Agentic systems\n\nTool use, planning loops, multi-step reasoning, agent frameworks.\n\n## Resources\n\n- [Building effective agents](https://www.anthropic.com/research/building-effective-agents)\n\n## Notes\n\n_(none yet)_"
+        }
+      ]
+    },
+    {
+      "slug": "coding-agents",
+      "name": "Coding agents",
+      "files": [
+        {
+          "path": "coding-agents/theory/overview.md",
+          "slug": "overview",
+          "kind": "theory",
+          "title": "Coding agents",
+          "date_added": "2026-05-01",
+          "content": "# Coding agents\n\nClaude Code, Cursor, Copilot, Devin, etc. Architectures and capabilities here; CLI commands, workflows, and shortcuts go under `practice/`.\n\n## Notes\n\n_(stub — replace with study content)_"
+        }
+      ]
+    },
+    {
+      "slug": "data",
+      "name": "Data",
+      "files": [
+        {
+          "path": "data/theory/overview.md",
+          "slug": "overview",
+          "kind": "theory",
+          "title": "Data & datasets",
+          "date_added": "2026-05-01",
+          "content": "# Data & datasets\n\nPretraining mixes, synthetic data, dedup, filtering, dataset cards, licensing. Dataset-construction workflows go under `practice/`.\n\n## Notes\n\n_(stub — replace with study content)_"
         }
       ]
     },
@@ -22,10 +50,10 @@ window.RESOURCES = {
       "name": "Evaluation",
       "files": [
         {
-          "path": "evaluation/evals-design.md",
+          "path": "evaluation/theory/evals-design.md",
           "slug": "evals-design",
+          "kind": "theory",
           "title": "Designing reliable evals",
-          "category": "Evaluation",
           "date_added": "2026-04-22",
           "content": "# Designing reliable evals\n\nCommon pitfalls, eval-driven development, golden sets vs. LLM-as-judge.\n\n## Notes\n\n_(none yet)_"
         }
@@ -36,18 +64,18 @@ window.RESOURCES = {
       "name": "Fine-tuning",
       "files": [
         {
-          "path": "fine-tuning/lora.md",
+          "path": "fine-tuning/theory/lora.md",
           "slug": "lora",
+          "kind": "theory",
           "title": "LoRA & PEFT",
-          "category": "Fine-tuning",
           "date_added": "2026-04-02",
           "content": "# LoRA & PEFT\n\nLow-rank adapters, parameter-efficient fine-tuning techniques.\n\n## Resources\n\n- [LoRA paper](https://arxiv.org/abs/2106.09685)\n\n## Notes\n\n_(none yet)_"
         },
         {
-          "path": "fine-tuning/rlhf.md",
+          "path": "fine-tuning/theory/rlhf.md",
           "slug": "rlhf",
+          "kind": "theory",
           "title": "RLHF & DPO",
-          "category": "Fine-tuning",
           "date_added": "2026-04-15",
           "content": "# RLHF & DPO\n\nReward modeling, PPO for language models, direct preference optimization.\n\n## Resources\n\n- [DPO paper](https://arxiv.org/abs/2305.18290)\n\n## Notes\n\n_(none yet)_"
         }
@@ -58,26 +86,26 @@ window.RESOURCES = {
       "name": "Foundations",
       "files": [
         {
-          "path": "foundations/diffusion.md",
+          "path": "foundations/theory/diffusion.md",
           "slug": "diffusion",
+          "kind": "theory",
           "title": "Diffusion models",
-          "category": "Foundations",
           "date_added": "2026-04-25",
           "content": "# Diffusion models\n\nDenoising diffusion, score-based models, image generation.\n\n## Resources\n\n- [DDPM paper](https://arxiv.org/abs/2006.11239)\n\n## Notes\n\n_(none yet)_"
         },
         {
-          "path": "foundations/tokenization.md",
+          "path": "foundations/theory/tokenization.md",
           "slug": "tokenization",
+          "kind": "theory",
           "title": "Tokenization & BPE",
-          "category": "Foundations",
           "date_added": "2026-01-15",
           "content": "# Tokenization & BPE\n\nByte-pair encoding, subword tokenizers, vocabulary construction.\n\n## Resources\n\n- [HF Tokenizers course](https://huggingface.co/learn/nlp-course/chapter6)\n\n## Notes\n\n_(none yet)_"
         },
         {
-          "path": "foundations/transformers.md",
+          "path": "foundations/theory/transformers.md",
           "slug": "transformers",
+          "kind": "theory",
           "title": "Transformers",
-          "category": "Foundations",
           "date_added": "2026-01-10",
           "content": "# Transformers\n\nSelf-attention, multi-head attention, encoder/decoder architecture.\n\n## Resources\n\n- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)\n- [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/)\n\n## Notes\n\n_(none yet)_"
         }
@@ -88,18 +116,18 @@ window.RESOURCES = {
       "name": "Local models",
       "files": [
         {
-          "path": "local-models/ollama.md",
+          "path": "local-models/practice/ollama.md",
           "slug": "ollama",
+          "kind": "practice",
           "title": "Ollama & local inference",
-          "category": "Local models",
           "date_added": "2026-04-25",
           "content": "# Ollama & local inference\n\nRunning open-weight models locally, model registry, GPU/CPU options.\n\n## Resources\n\n- [Ollama](https://ollama.com)\n\n## Notes\n\n_(none yet)_"
         },
         {
-          "path": "local-models/quantization.md",
+          "path": "local-models/theory/quantization.md",
           "slug": "quantization",
+          "kind": "theory",
           "title": "Quantization (GGUF, GPTQ, AWQ)",
-          "category": "Local models",
           "date_added": "2026-04-26",
           "content": "# Quantization (GGUF, GPTQ, AWQ)\n\nWeight quantization formats and trade-offs for local inference.\n\n## Notes\n\n_(none yet)_"
         }
@@ -110,20 +138,34 @@ window.RESOURCES = {
       "name": "MCP",
       "files": [
         {
-          "path": "mcp/mcp-servers.md",
+          "path": "mcp/practice/mcp-servers.md",
           "slug": "mcp-servers",
+          "kind": "practice",
           "title": "Building MCP servers",
-          "category": "MCP",
           "date_added": "2026-04-29",
           "content": "# Building MCP servers\n\nSDK usage, tool design, auth flows, server lifecycle.\n\n## Notes\n\n_(none yet)_"
         },
         {
-          "path": "mcp/mcp-basics.md",
+          "path": "mcp/theory/mcp-basics.md",
           "slug": "mcp-basics",
+          "kind": "theory",
           "title": "Model Context Protocol — basics",
-          "category": "MCP",
           "date_added": "2026-04-28",
           "content": "# Model Context Protocol — basics\n\nSpec overview, transports, primitives (tools/resources/prompts).\n\n## Resources\n\n- [MCP docs](https://modelcontextprotocol.io)\n\n## Notes\n\n_(none yet)_"
+        }
+      ]
+    },
+    {
+      "slug": "multimodal",
+      "name": "Multimodal",
+      "files": [
+        {
+          "path": "multimodal/theory/overview.md",
+          "slug": "overview",
+          "kind": "theory",
+          "title": "Multimodal",
+          "date_added": "2026-05-01",
+          "content": "# Multimodal\n\nVLMs (image understanding), TTS / ASR, video gen, audio models. Diffusion fundamentals are under `foundations/`.\n\n## Notes\n\n_(stub — replace with study content)_"
         }
       ]
     },
@@ -132,20 +174,62 @@ window.RESOURCES = {
       "name": "New models",
       "files": [
         {
-          "path": "new-models/claude-4x.md",
+          "path": "new-models/theory/claude-4x.md",
           "slug": "claude-4x",
+          "kind": "theory",
           "title": "Claude 4.x family",
-          "category": "New models",
           "date_added": "2026-04-30",
           "content": "# Claude 4.x family\n\nOpus 4.7, Sonnet 4.6, Haiku 4.5 — capabilities, context, pricing.\n\n## Resources\n\n- [Anthropic news](https://www.anthropic.com/news)\n\n## Notes\n\n_(none yet)_"
         },
         {
-          "path": "new-models/frontier-evals.md",
+          "path": "new-models/theory/frontier-evals.md",
           "slug": "frontier-evals",
+          "kind": "theory",
           "title": "Frontier model eval comparisons",
-          "category": "New models",
           "date_added": "2026-04-30",
           "content": "# Frontier model eval comparisons\n\nHow current frontier models compare on reasoning, code, agentic tasks.\n\n## Notes\n\n_(none yet)_"
+        }
+      ]
+    },
+    {
+      "slug": "policy",
+      "name": "Policy",
+      "files": [
+        {
+          "path": "policy/theory/overview.md",
+          "slug": "overview",
+          "kind": "theory",
+          "title": "Policy & regulation",
+          "date_added": "2026-05-01",
+          "content": "# Policy & regulation\n\nEU AI Act, US executive orders, export controls, model release policy, copyright disputes. Concrete compliance checklists go under `practice/`.\n\n## Notes\n\n_(stub — replace with study content)_"
+        }
+      ]
+    },
+    {
+      "slug": "prompt-engineering",
+      "name": "Prompt engineering",
+      "files": [
+        {
+          "path": "prompt-engineering/theory/overview.md",
+          "slug": "overview",
+          "kind": "theory",
+          "title": "Prompt engineering",
+          "date_added": "2026-05-01",
+          "content": "# Prompt engineering\n\nSystem prompts, structured outputs, role/format/example design, prompt caching strategy, jailbreak defenses. Practice recipes go under `practice/`, taxonomy and theory here.\n\n## Notes\n\n_(stub — replace with study content)_"
+        }
+      ]
+    },
+    {
+      "slug": "reasoning",
+      "name": "Reasoning",
+      "files": [
+        {
+          "path": "reasoning/theory/overview.md",
+          "slug": "overview",
+          "kind": "theory",
+          "title": "Reasoning",
+          "date_added": "2026-05-01",
+          "content": "# Reasoning\n\nTest-time compute, chain-of-thought, scratchpads, search, RL-on-reasoning (o-series, R1-style). Write study notes here as you read.\n\n## Notes\n\n_(stub — replace with study content)_"
         }
       ]
     },
@@ -154,12 +238,40 @@ window.RESOURCES = {
       "name": "Retrieval",
       "files": [
         {
-          "path": "retrieval/rag.md",
+          "path": "retrieval/theory/rag.md",
           "slug": "rag",
+          "kind": "theory",
           "title": "Retrieval-Augmented Generation",
-          "category": "Retrieval",
           "date_added": "2026-03-20",
           "content": "# Retrieval-Augmented Generation\n\nEmbeddings, vector stores, retrieval pipelines, reranking.\n\n## Resources\n\n- [Anthropic — Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval)\n\n## Notes\n\n_(none yet)_"
+        }
+      ]
+    },
+    {
+      "slug": "safety",
+      "name": "Safety",
+      "files": [
+        {
+          "path": "safety/theory/overview.md",
+          "slug": "overview",
+          "kind": "theory",
+          "title": "Safety & alignment",
+          "date_added": "2026-05-01",
+          "content": "# Safety & alignment\n\nAlignment techniques, red-teaming, jailbreak research, interpretability, constitutional AI, harm evals. RL-from-feedback details live under `fine-tuning/`.\n\n## Notes\n\n_(stub — replace with study content)_"
+        }
+      ]
+    },
+    {
+      "slug": "serving",
+      "name": "Serving",
+      "files": [
+        {
+          "path": "serving/theory/overview.md",
+          "slug": "overview",
+          "kind": "theory",
+          "title": "Serving & inference",
+          "date_added": "2026-05-01",
+          "content": "# Serving & inference\n\nProduction inference: vLLM, TGI, batching, throughput vs latency, KV-cache management at scale, speculative decoding. Personal/local setups live under `local-models/`.\n\n## Notes\n\n_(stub — replace with study content)_"
         }
       ]
     },
@@ -168,18 +280,18 @@ window.RESOURCES = {
       "name": "Tips & tricks",
       "files": [
         {
-          "path": "tips-and-tricks/caching-cost.md",
+          "path": "tips-and-tricks/practice/caching-cost.md",
           "slug": "caching-cost",
+          "kind": "practice",
           "title": "Caching & cost optimization",
-          "category": "Tips & tricks",
           "date_added": "2026-04-18",
           "content": "# Caching & cost optimization\n\nPrompt caching, cache hit rates, system-prompt placement.\n\n## Resources\n\n- [Anthropic — Prompt caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching)\n\n## Notes\n\n_(none yet)_"
         },
         {
-          "path": "tips-and-tricks/prompt-patterns.md",
+          "path": "tips-and-tricks/practice/prompt-patterns.md",
           "slug": "prompt-patterns",
+          "kind": "practice",
           "title": "Prompt engineering patterns",
-          "category": "Tips & tricks",
           "date_added": "2026-02-12",
           "content": "# Prompt engineering patterns\n\nFew-shot, chain-of-thought, tool-use templates, structured output.\n\n## Notes\n\n_(none yet)_"
         }

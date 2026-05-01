@@ -21,59 +21,47 @@
     const body = n.body || n.summary || "";
     const sources = normalizeSources(n);
 
-    const parts = [
-      el("p", { class: "story-prose" }, [
-        el("strong", { class: "story-headline" }, headline),
-        " ",
-        body,
-      ]),
-    ];
+    const parts = [];
+    if (n.date) parts.push(el("div", { class: "story-date" }, n.date));
+    parts.push(el("h2", { class: "story-title" }, headline));
+    if (body) parts.push(el("p", { class: "story-body" }, body));
 
     if (sources.length) {
       parts.push(
-        el("div", { class: "story-refs" }, [
-          el("div", { class: "story-refs-label" }, "References"),
-          el(
-            "ol",
-            { class: "story-refs-list" },
-            sources.map((s) =>
-              el("li", { class: "story-ref" }, [
-                el(
-                  "a",
-                  { href: s.url, target: "_blank", rel: "noopener", title: s.title || s.url },
-                  [
-                    el("span", { class: "ref-title" }, s.title || s.url),
-                    el("span", { class: "ref-source" }, s.source || ""),
-                  ]
-                ),
-              ])
-            )
-          ),
-        ])
+        el(
+          "ol",
+          { class: "story-refs-list" },
+          sources.map((s) =>
+            el("li", { class: "story-ref" }, [
+              el(
+                "a",
+                { href: s.url, target: "_blank", rel: "noopener", title: s.title || s.url },
+                [
+                  el("span", { class: "ref-title" }, s.title || s.url),
+                  el("span", { class: "ref-source" }, s.source || ""),
+                ]
+              ),
+            ])
+          )
+        )
       );
     }
 
     if (n.note) parts.push(el("div", { class: "story-note" }, n.note));
-    parts.push(
-      el("div", { class: "story-meta" }, [n.date || "", n.auto ? " · auto" : ""])
-    );
 
     return el("article", { class: "story" }, parts);
   }
 
   function render() {
     const list = document.getElementById("news");
-    const count = document.getElementById("news-count");
     list.innerHTML = "";
 
     if (stories.length === 0) {
       list.appendChild(
         el("div", { class: "empty" }, "No briefings yet — add stories to data/news.js or run /update-news.")
       );
-      count.textContent = "";
       return;
     }
-    count.textContent = `${stories.length} stor${stories.length === 1 ? "y" : "ies"}`;
 
     stories.forEach((n) => list.appendChild(renderStory(n)));
   }
