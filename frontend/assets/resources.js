@@ -1,10 +1,10 @@
 (function () {
   "use strict";
   const { el } = window.App;
-  const data = window.TOPICS || { categories: [] };
+  const data = window.RESOURCES || { categories: [] };
 
   let currentPath = null;
-  const expanded = new Set(["topics"]);
+  const expanded = new Set(["resources"]);
 
   // ---------- markdown rendering ----------
 
@@ -97,9 +97,9 @@
   }
 
   function ensureCurrentExpanded() {
-    expanded.add("topics");
+    expanded.add("resources");
     if (currentPath) {
-      expanded.add("topics/" + currentPath.split("/")[0]);
+      expanded.add("resources/" + currentPath.split("/")[0]);
     }
   }
 
@@ -110,7 +110,7 @@
       "a",
       {
         class: "tree-row tree-file" + (currentPath === f.path ? " active" : ""),
-        href: "#topics/" + f.path.replace(/\.md$/, ""),
+        href: "#resources/" + f.path.replace(/\.md$/, ""),
         "data-path": f.path,
       },
       [
@@ -139,7 +139,7 @@
 
   function renderSidebar() {
     ensureCurrentExpanded();
-    const tree = document.getElementById("topics-tree");
+    const tree = document.getElementById("resources-tree");
     tree.innerHTML = "";
 
     if (!data.categories.length) {
@@ -147,17 +147,17 @@
         el(
           "div",
           { class: "empty" },
-          "No topics yet. Add markdown files to topics/ and run python3 scripts/build-topics.py."
+          "No documents yet. Add markdown files to resources/ and run python3 scripts/build-resources.py."
         )
       );
       return;
     }
 
-    const rootKey = "topics";
+    const rootKey = "resources";
     const rootOpen = expanded.has(rootKey);
 
     const categoryNodes = data.categories.map((cat) => {
-      const catKey = "topics/" + cat.slug;
+      const catKey = "resources/" + cat.slug;
       const catOpen = expanded.has(catKey);
       const catRow = folderRow(catKey, cat.slug, catOpen);
       const children = catOpen
@@ -173,7 +173,7 @@
     const rootChildren = rootOpen
       ? el("div", { class: "tree-children" }, categoryNodes)
       : null;
-    const rootRow = folderRow(rootKey, "topics", rootOpen);
+    const rootRow = folderRow(rootKey, "resources", rootOpen);
     const rootNode = el(
       "div",
       { class: "tree-folder" + (rootOpen ? " open" : "") },
@@ -182,7 +182,7 @@
 
     tree.appendChild(rootNode);
 
-    const count = document.getElementById("topics-count");
+    const count = document.getElementById("resources-count");
     if (count) {
       const total = data.categories.reduce((n, c) => n + c.files.length, 0);
       count.textContent = `${total} file${total === 1 ? "" : "s"}`;
@@ -192,11 +192,11 @@
   // ---------- content ----------
 
   function renderContent() {
-    const content = document.getElementById("topics-content");
+    const content = document.getElementById("resources-content");
     content.innerHTML = "";
     if (!currentPath) {
       content.appendChild(
-        el("div", { class: "topics-placeholder" }, "Select a topic from the sidebar.")
+        el("div", { class: "resources-placeholder" }, "Select a document from the sidebar.")
       );
       return;
     }
@@ -205,13 +205,13 @@
       content.appendChild(el("div", { class: "empty" }, "Not found."));
       return;
     }
-    const meta = el("div", { class: "topic-meta" }, [
-      el("span", { class: "topic-category" }, found.category.name),
+    const meta = el("div", { class: "resource-meta" }, [
+      el("span", { class: "resource-category" }, found.category.name),
       found.file.date_added
-        ? el("span", { class: "topic-date" }, "added " + found.file.date_added)
+        ? el("span", { class: "resource-date" }, "added " + found.file.date_added)
         : null,
     ]);
-    const article = el("article", { class: "topic-page" });
+    const article = el("article", { class: "resource-page" });
     article.innerHTML = renderMarkdown(found.file.content);
     content.appendChild(meta);
     content.appendChild(article);
@@ -222,8 +222,8 @@
 
   function pathFromHash() {
     const h = location.hash.replace(/^#/, "");
-    if (!h.startsWith("topics/")) return null;
-    return h.slice("topics/".length) + ".md";
+    if (!h.startsWith("resources/")) return null;
+    return h.slice("resources/".length) + ".md";
   }
 
   function selectByHash() {
@@ -238,7 +238,7 @@
   }
 
   function bind() {
-    const tree = document.getElementById("topics-tree");
+    const tree = document.getElementById("resources-tree");
     tree.addEventListener("click", (e) => {
       const folderBtn = e.target.closest(".tree-folder-row");
       if (folderBtn) {
@@ -253,7 +253,7 @@
       if (fileLink) {
         e.preventDefault();
         currentPath = fileLink.dataset.path;
-        history.pushState(null, "", "#topics/" + currentPath.replace(/\.md$/, ""));
+        history.pushState(null, "", "#resources/" + currentPath.replace(/\.md$/, ""));
         renderSidebar();
         renderContent();
       }
@@ -265,5 +265,5 @@
     selectByHash();
   }
 
-  window.App.topics = { render, selectByHash };
+  window.App.resources = { render, selectByHash };
 })();

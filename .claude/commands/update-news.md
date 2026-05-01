@@ -1,15 +1,15 @@
 ---
-description: Read the web broadly, synthesize an AI-news briefing covering models, features, research, business, and regulation into themed stories, rewrite data/news.js (run before pushing).
+description: Read the web broadly, synthesize an AI-news briefing covering models, features, research, business, and regulation into themed stories, rewrite frontend/data/news.js (run before pushing).
 allowed-tools: WebSearch WebFetch Read Edit Write
 ---
 
 # /update-news
 
-Refresh `data/news.js` with a fresh, **synthesized** AI-news briefing — themed stories with references, not a flat link list. Cast a wide net: anything AI-relevant from the last ~14 days. Run this locally before pushing the repo.
+Refresh `frontend/data/news.js` with a fresh, **synthesized** AI-news briefing — themed stories with references, not a flat link list. Cast a wide net: anything AI-relevant from the last ~14 days. Run this locally before pushing the repo.
 
 ## What to do
 
-1. **Read the current file** at `data/news.js`. Identify the manual stories (no `auto: true`) — these are preserved verbatim. **Every prior `auto: true` story will be discarded** and replaced with the freshly synthesized briefing; do not try to dedup or merge against them.
+1. **Read the current file** at `frontend/data/news.js`. Identify the manual stories (no `auto: true`) — these are preserved verbatim. **Every prior `auto: true` story will be discarded** and replaced with the freshly synthesized briefing; do not try to dedup or merge against them.
 
 2. **Read the web broadly.** Use both `WebSearch` (for discovery and trend-spotting) and `WebFetch` (for confirming claims, titles, dates). Aim for the **last 14 days**. Cast wide:
 
@@ -69,7 +69,7 @@ Refresh `data/news.js` with a fresh, **synthesized** AI-news briefing — themed
    - Sort the final list by `date` descending.
    - Cap auto stories at **8**; manual stories are never trimmed.
 
-6. **Rewrite** `data/news.js` with this exact shape:
+6. **Rewrite** `frontend/data/news.js` with this exact shape:
 
    ```js
    // Manually curate AI news here OR run /update-news to refresh auto entries.

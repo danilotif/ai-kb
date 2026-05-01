@@ -1,47 +1,79 @@
 # AI Program
 
-A personal, static dashboard for tracking what I know in AI, what I'm studying next, and curated news.
+A personal AI knowledge base + news briefing, served as a static dashboard.
+
+- **Knowledge Base** — long-form study documents, one markdown file per topic, organized by category under `resources/`.
+- **News** — synthesized AI-news briefing in `frontend/data/news.js`, refreshed via the `/update-news` slash command.
 
 ## Open it
 
-Just open `index.html` in a browser. No build step, no dependencies.
-
 ```sh
-open index.html      # macOS
+open frontend/index.html      # macOS
 ```
 
-## Edit content
+No build step, no dependencies. Works from `file://`.
 
-- **Topics** — `data/topics.js`. Each entry: `name`, `category`, `description`, `status`, `tags`, `resources`, `date_added`.
-- **News** — `data/news.js`. Each entry: `title`, `url`, `source`, `date`, optional `note`. Items added by `/update-news` carry `auto: true`; hand-added items are preserved.
+## Edit the knowledge base
 
-Topics are grouped by `category` in the UI — adding a new category is just typing it on a topic.
+Add or edit markdown under `resources/<category>/<slug>.md`:
 
-Status values: `queued` · `studying` · `done`. The dashboard sorts by status and lets you filter by chip.
+```markdown
+---
+title: Your title
+category: Foundations
+date_added: 2026-05-01
+---
 
-## Refresh news
+# Your title
 
-Inside Claude Code, run:
+Long-form content...
+
+## Resources
+
+- [Source](https://...)
+
+## Notes
+
+_(your notes here)_
+```
+
+Then regenerate the index so the dashboard sees the new file:
+
+```sh
+python3 frontend/scripts/build-resources.py
+```
+
+Categories are recognized from `CATEGORY_NAMES` in that script — add new ones there before creating their directory.
+
+## Refresh the news
+
+Inside Claude Code:
 
 ```
 /update-news
 ```
 
-It fetches fresh AI news (Anthropic, OpenAI, DeepMind, Hugging Face, arXiv, HN), dedups against your current list, and rewrites `data/news.js`. Manual entries are preserved. Review the diff, then commit and push.
+Synthesizes 4–8 themed stories from primary sources + tech press, rewrites `frontend/data/news.js`. Manual entries are preserved. Review the diff, commit, push.
 
 The command spec lives at `.claude/commands/update-news.md`.
 
-## Files
+## Layout
 
 ```
-index.html                     entry point
-assets/styles.css              dark theme styles
-assets/app.js                  rendering + grouping + filtering
-data/topics.js                 hand-edited topic list (with categories)
-data/news.js                   news list (manual + auto)
-.claude/commands/update-news.md  /update-news slash command
+resources/                          knowledge base — markdown source of truth
+frontend/                           static dashboard
+  index.html
+  assets/                           styles + JS modules
+  data/
+    resources.js                    generated KB index (do not edit by hand)
+    news.js                         hand- and auto-curated news briefing
+  scripts/
+    build-resources.py              regenerates data/resources.js from resources/*.md
+.claude/commands/update-news.md     /update-news slash command
+CLAUDE.md                           project notes for Claude (architecture, conventions)
+README.md                           this file
 ```
 
 ## Hosting
 
-Static — works as-is on GitHub Pages, Netlify, or any static host.
+Static — works as-is on GitHub Pages, Netlify, or any static host. Point the host at the `frontend/` directory (or copy `frontend/` to the deploy root).
