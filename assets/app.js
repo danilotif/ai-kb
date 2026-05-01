@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VALID_VIEWS = new Set(["news", "topics", "resources"]);
+  const VALID_VIEWS = new Set(["news", "topics"]);
 
   function viewFromHash() {
     const first = location.hash.replace(/^#/, "").split("/")[0];
@@ -15,14 +15,14 @@
     document.querySelectorAll(".view").forEach((v) => {
       v.classList.toggle("hidden", v.dataset.view !== name);
     });
-    document.body.classList.toggle("view-resources", name === "resources");
+    document.body.classList.toggle("view-topics", name === "topics");
   }
 
   function applyHash() {
     const view = viewFromHash();
     setView(view);
-    if (view === "resources") {
-      window.App.resources.selectByHash();
+    if (view === "topics") {
+      window.App.topics.selectByHash();
     }
   }
 
@@ -41,7 +41,6 @@
   document.addEventListener("DOMContentLoaded", () => {
     window.App.topics.render();
     window.App.briefing.render();
-    window.App.resources.render();
     bindNav();
     applyHash();
   });

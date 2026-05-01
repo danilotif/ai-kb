@@ -1,81 +1,269 @@
 (function () {
   "use strict";
   const { el } = window.App;
+  const data = window.TOPICS || { categories: [] };
 
-  const UNCATEGORIZED = "Uncategorized";
+  let currentPath = null;
+  const expanded = new Set(["topics"]);
 
-  const topics = (window.TOPICS || [])
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.name));
+  // ---------- markdown rendering ----------
 
-  function groupByCategory(list) {
-    const groups = new Map();
-    for (const t of list) {
-      const key = t.category || UNCATEGORIZED;
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(t);
-    }
-    return Array.from(groups.entries()).sort(([a], [b]) => {
-      if (a === UNCATEGORIZED) return 1;
-      if (b === UNCATEGORIZED) return -1;
-      return a.localeCompare(b);
-    });
+  function escapeHtml(s) {
+    return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
   }
 
-  function renderCard(t) {
-    const parts = [
-      el("div", { class: "card-head" }, [el("h3", { class: "card-title" }, t.name)]),
-    ];
+  function inline(s) {
+    s = escapeHtml(s);
+    s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+    s = s.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener">$1</a>'
+    );
+    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
+    return s;
+  }
 
-    if (t.description) parts.push(el("p", { class: "card-desc" }, t.description));
-
-    if (t.tags && t.tags.length) {
-      parts.push(
-        el("div", { class: "tags" }, t.tags.map((tag) => el("span", { class: "tag" }, tag)))
-      );
+  function renderMarkdown(md) {
+    const lines = md.split("\n");
+    const out = [];
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+      if (line.startsWith("# ")) {
+        out.push(`<h1>${inline(line.slice(2))}</h1>`);
+        i++;
+      } else if (line.startsWith("## ")) {
+        out.push(`<h2>${inline(line.slice(3))}</h2>`);
+        i++;
+      } else if (line.startsWith("- ")) {
+        const items = [];
+        while (i < lines.length && lines[i].startsWith("- ")) {
+          items.push(`<li>${inline(lines[i].slice(2))}</li>`);
+          i++;
+        }
+        out.push(`<ul>${items.join("")}</ul>`);
+      } else if (line.trim() === "") {
+        i++;
+      } else {
+        const para = [];
+        while (
+          i < lines.length &&
+          lines[i].trim() !== "" &&
+          !lines[i].startsWith("#") &&
+          !lines[i].startsWith("- ")
+        ) {
+          para.push(lines[i]);
+          i++;
+        }
+        out.push(`<p>${inline(para.join(" "))}</p>`);
+      }
     }
+    return out.join("\n");
+  }
 
-    if (t.resources && t.resources.length) {
-      parts.push(
+  // ---------- icons ----------
+
+  const ICON_FOLDER =
+    '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 3.75A1.25 1.25 0 012.75 2.5h3.382a1.25 1.25 0 01.884.366L8.5 4.25h4.75A1.25 1.25 0 0114.5 5.5v6.75a1.25 1.25 0 01-1.25 1.25H2.75A1.25 1.25 0 011.5 12.25V3.75z"/></svg>';
+  const ICON_FILE =
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M9.5 1.75H4a1.25 1.25 0 00-1.25 1.25v10a1.25 1.25 0 001.25 1.25h8A1.25 1.25 0 0013.25 13V5.5l-3.75-3.75z"/><path d="M9.5 1.75V5.5h3.75"/></svg>';
+  const ICON_CHEVRON =
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/></svg>';
+
+  function glyph(html, cls) {
+    const s = document.createElement("span");
+    s.className = cls;
+    s.innerHTML = html;
+    return s;
+  }
+
+  // ---------- lookup ----------
+
+  function findFile(path) {
+    for (const c of data.categories) {
+      for (const f of c.files) {
+        if (f.path === path) return { category: c, file: f };
+      }
+    }
+    return null;
+  }
+
+  function firstPath() {
+    for (const c of data.categories) {
+      if (c.files.length) return c.files[0].path;
+    }
+    return null;
+  }
+
+  function ensureCurrentExpanded() {
+    expanded.add("topics");
+    if (currentPath) {
+      expanded.add("topics/" + currentPath.split("/")[0]);
+    }
+  }
+
+  // ---------- sidebar ----------
+
+  function fileRow(f) {
+    return el(
+      "a",
+      {
+        class: "tree-row tree-file" + (currentPath === f.path ? " active" : ""),
+        href: "#topics/" + f.path.replace(/\.md$/, ""),
+        "data-path": f.path,
+      },
+      [
+        glyph("", "tree-chev tree-chev-spacer"),
+        glyph(ICON_FILE, "tree-icon tree-icon-file"),
+        el("span", { class: "tree-label" }, f.slug),
+      ]
+    );
+  }
+
+  function folderRow(key, label, isOpen) {
+    return el(
+      "button",
+      {
+        class: "tree-row tree-folder-row",
+        type: "button",
+        "data-toggle": key,
+      },
+      [
+        glyph(ICON_CHEVRON, "tree-chev" + (isOpen ? " open" : "")),
+        glyph(ICON_FOLDER, "tree-icon tree-icon-folder"),
+        el("span", { class: "tree-label" }, label),
+      ]
+    );
+  }
+
+  function renderSidebar() {
+    ensureCurrentExpanded();
+    const tree = document.getElementById("topics-tree");
+    tree.innerHTML = "";
+
+    if (!data.categories.length) {
+      tree.appendChild(
         el(
-          "ul",
-          { class: "resources" },
-          t.resources.map((r) =>
-            el("li", {}, [
-              el("a", { href: r.url, target: "_blank", rel: "noopener" }, r.title || r.url),
-            ])
-          )
+          "div",
+          { class: "empty" },
+          "No topics yet. Add markdown files to topics/ and run python3 scripts/build-topics.py."
         )
       );
-    }
-
-    if (t.date_added) {
-      parts.push(el("div", { class: "card-foot" }, [el("span", {}, "added " + t.date_added)]));
-    }
-
-    return el("div", { class: "card" }, parts);
-  }
-
-  function render() {
-    const container = document.getElementById("topics");
-    container.innerHTML = "";
-
-    if (topics.length === 0) {
-      container.appendChild(el("div", { class: "empty" }, "No topics yet."));
       return;
     }
 
-    groupByCategory(topics).forEach(([category, items]) => {
-      const head = el("div", { class: "category-head" }, [
-        el("h3", { class: "category-name" }, category),
-        el("span", { class: "category-count" }, `${items.length}`),
-      ]);
+    const rootKey = "topics";
+    const rootOpen = expanded.has(rootKey);
 
-      const grid = el("div", { class: "grid" }, items.map(renderCard));
+    const categoryNodes = data.categories.map((cat) => {
+      const catKey = "topics/" + cat.slug;
+      const catOpen = expanded.has(catKey);
+      const catRow = folderRow(catKey, cat.slug, catOpen);
+      const children = catOpen
+        ? el("div", { class: "tree-children" }, cat.files.map(fileRow))
+        : null;
+      return el(
+        "div",
+        { class: "tree-folder" + (catOpen ? " open" : "") },
+        children ? [catRow, children] : [catRow]
+      );
+    });
 
-      container.appendChild(el("div", { class: "category-block" }, [head, grid]));
+    const rootChildren = rootOpen
+      ? el("div", { class: "tree-children" }, categoryNodes)
+      : null;
+    const rootRow = folderRow(rootKey, "topics", rootOpen);
+    const rootNode = el(
+      "div",
+      { class: "tree-folder" + (rootOpen ? " open" : "") },
+      rootChildren ? [rootRow, rootChildren] : [rootRow]
+    );
+
+    tree.appendChild(rootNode);
+
+    const count = document.getElementById("topics-count");
+    if (count) {
+      const total = data.categories.reduce((n, c) => n + c.files.length, 0);
+      count.textContent = `${total} file${total === 1 ? "" : "s"}`;
+    }
+  }
+
+  // ---------- content ----------
+
+  function renderContent() {
+    const content = document.getElementById("topics-content");
+    content.innerHTML = "";
+    if (!currentPath) {
+      content.appendChild(
+        el("div", { class: "topics-placeholder" }, "Select a topic from the sidebar.")
+      );
+      return;
+    }
+    const found = findFile(currentPath);
+    if (!found) {
+      content.appendChild(el("div", { class: "empty" }, "Not found."));
+      return;
+    }
+    const meta = el("div", { class: "topic-meta" }, [
+      el("span", { class: "topic-category" }, found.category.name),
+      found.file.date_added
+        ? el("span", { class: "topic-date" }, "added " + found.file.date_added)
+        : null,
+    ]);
+    const article = el("article", { class: "topic-page" });
+    article.innerHTML = renderMarkdown(found.file.content);
+    content.appendChild(meta);
+    content.appendChild(article);
+    content.scrollTop = 0;
+  }
+
+  // ---------- routing + binding ----------
+
+  function pathFromHash() {
+    const h = location.hash.replace(/^#/, "");
+    if (!h.startsWith("topics/")) return null;
+    return h.slice("topics/".length) + ".md";
+  }
+
+  function selectByHash() {
+    const target = pathFromHash();
+    if (target && findFile(target)) {
+      currentPath = target;
+    } else if (!currentPath) {
+      currentPath = firstPath();
+    }
+    renderSidebar();
+    renderContent();
+  }
+
+  function bind() {
+    const tree = document.getElementById("topics-tree");
+    tree.addEventListener("click", (e) => {
+      const folderBtn = e.target.closest(".tree-folder-row");
+      if (folderBtn) {
+        e.preventDefault();
+        const key = folderBtn.dataset.toggle;
+        if (expanded.has(key)) expanded.delete(key);
+        else expanded.add(key);
+        renderSidebar();
+        return;
+      }
+      const fileLink = e.target.closest("a.tree-file");
+      if (fileLink) {
+        e.preventDefault();
+        currentPath = fileLink.dataset.path;
+        history.pushState(null, "", "#topics/" + currentPath.replace(/\.md$/, ""));
+        renderSidebar();
+        renderContent();
+      }
     });
   }
 
-  window.App.topics = { render };
+  function render() {
+    bind();
+    selectByHash();
+  }
+
+  window.App.topics = { render, selectByHash };
 })();
