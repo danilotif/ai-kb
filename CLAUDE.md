@@ -23,7 +23,7 @@ That's the whole repo. Anything else (build artifacts, IDE configs, etc.) should
   - **Knowledge Base**: a sidebar file-tree (category → theory|practice → documents) with the selected document's markdown rendered in the main pane.
 - **Routing**: hash-based with `pushState`/`popstate`. URL forms: `` (news), `#resources`, `#resources/<category-slug>/<kind>/<file-slug>` where `<kind>` is `theory` or `practice` (deep link to a specific document).
 - **Code split into IIFE modules** under `window.App`, loaded via plain `<script>` tags in load order: util → resources/briefing → app.
-- **News refresh** via `/update-news` slash command (see `.claude/commands/update-news.md`) — Claude reads the web, synthesizes 4–8 themed stories, and rewrites `frontend/data/news.js`. Manual stories are preserved; auto stories are discarded each run. News does **not** mirror into `resources/` — news and KB are separate concerns.
+- **News refresh** via `/update-news` slash command (see `.claude/commands/update-news.md`) — Claude reads the web, synthesizes 4–8 themed candidate stories, and merges them into `frontend/data/news.js`: candidates that cover the same underlying news as an existing story extend it (new sources appended, body rewritten, date bumped); genuinely new candidates are prepended. Every story is durable — nothing is discarded automatically. News does **not** mirror into `resources/` — news and KB are separate concerns.
 
 ## frontend/ map
 ```
@@ -39,7 +39,7 @@ frontend/
   data/
     config.js                 DOMAIN-SPECIFIC settings (window.CONFIG): site name, page title, tab labels, footer
     resources.js              GENERATED KB index (window.RESOURCES) — tree + content baked in for file:// support
-    news.js                   news stories (window.NEWS) — manual + auto entries
+    news.js                   news stories (window.NEWS) — durable; refreshed via /update-news (extends overlapping stories, prepends new ones)
   scripts/
     build-resources.py        regenerates frontend/data/resources.js by scanning ../resources/<cat>/<theory|practice>/*.md (stdlib only)
 ```
@@ -90,8 +90,7 @@ The minimal markdown subset rendered by `frontend/assets/resources.js` covers `#
   sources: [
     { title, url, source }   // source = lab/site name e.g. "OpenAI", "arXiv"
   ],
-  note?: string,             // editorial callout (italic, muted) — manual entries only
-  auto?: true                // set when written by /update-news; absent for manual entries
+  note?: string              // editorial callout (italic, muted) — optional
 }
 ```
 
@@ -99,16 +98,16 @@ The minimal markdown subset rendered by `frontend/assets/resources.js` covers `#
 - Vanilla over framework — keeps the repo accessible and zero-friction to edit.
 - JS data files over JSON — avoids needing a local server.
 - Dark theme only.
-- News and KB are separate concerns: news is ephemeral (refreshed on demand, replaces auto entries), KB documents are durable study pages you accumulate over time.
+- News and KB are separate concerns, but both are durable: `/update-news` extends overlapping stories rather than discarding them, so the news log accumulates over time alongside the KB.
 - Two-level hierarchy: category → theory|practice → document. Theory holds explanatory/reference notes; practice holds recipes, commands, and how-to docs. The split is enforced by the build script.
 - Top level is intentionally minimal: `resources/`, `frontend/`, `CLAUDE.md`, `README.md`. New top-level entries should be a deliberate decision, not accidental sprawl.
 
 ## /update-news workflow
 1. User runs `/update-news` in Claude Code.
-2. Claude reads current `frontend/data/news.js`, notes existing URLs.
-3. Claude fetches news from configured sources (Anthropic, OpenAI, DeepMind, HF, Mistral, arXiv cs.CL/cs.AI, HN AI threads, tech press).
-4. Claude scores by relevance, dedups, marks fetched items `auto: true`.
-5. Claude rewrites `frontend/data/news.js` (manual items preserved verbatim, auto items capped at 8).
+2. Claude reads current `frontend/data/news.js`, notes existing stories (headline, body, sources, date).
+3. Claude fetches news from configured sources (Anthropic, OpenAI, DeepMind, HF, Mistral, arXiv cs.CL/cs.AI, HN AI threads, tech press) and synthesizes 4–8 themed candidate stories.
+4. For each candidate, Claude decides: same news as an existing story → extend it (rewrite body, append new sources, bump date to `max`); genuinely new news → prepend as a new story. Untouched existing stories stay verbatim.
+5. Claude rewrites `frontend/data/news.js`, sorted by date desc. No automatic discard, no auto/manual distinction, no hard cap (Claude flags if the list passes ~20).
 6. User reviews diff, commits, pushes.
 
 ## Backlog / not yet done
@@ -122,7 +121,7 @@ The minimal markdown subset rendered by `frontend/assets/resources.js` covers `#
 
 ## Conventions
 - KB documents are edited as markdown under `resources/<category>/<theory|practice>/<slug>.md`. After editing, run `python3 frontend/scripts/build-resources.py`.
-- News is hand-edited in `frontend/data/news.js` for manual entries; auto entries come from `/update-news`.
+- News is hand-edited in `frontend/data/news.js` or refreshed via `/update-news`; both flows produce the same shape (no auto/manual distinction). `/update-news` extends overlapping stories instead of replacing them.
 - Adding a new category = `mkdir -p resources/<slug>/{theory,practice}` and drop at least one `.md` file into one of them (otherwise the category won't appear in the sidebar). Override the display name in `resources/_categories.json` if the slug doesn't title-case nicely.
 - The `slug` shown in the sidebar is the filename stem (e.g. `transformers.md` → `transformers`), so name files for what they should display.
 - Decide theory vs practice by audience need: theory = "I want to understand X" (concepts, derivations, reference). Practice = "I want to do X" (commands, recipes, workflows, tool how-tos).
