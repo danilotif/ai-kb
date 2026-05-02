@@ -77,7 +77,7 @@ After editing any markdown in `resources/`, regenerate the index from the repo r
 
 This rewrites `frontend/data/resources.js`. The script is stdlib-only, runs in <100ms. The dashboard cannot `fetch()` markdown from `file://`, which is why this offline bake step exists. Alternative: ask Claude to "rebuild the KB index" — same output, different mechanism.
 
-The minimal markdown subset rendered by `frontend/assets/resources.js` covers `# H1`, `## H2`, paragraphs, unordered lists with `- `, links, inline code, bold, italic. Tables, blockquotes, images, and ordered lists are not rendered — extend `renderMarkdown` if needed.
+The minimal markdown subset rendered by `frontend/assets/resources.js` covers `# H1`, `## H2`, paragraphs, unordered lists with `- `, links, inline code, bold (`**...**`), italic (`*...*`). Tables, blockquotes, images, and ordered lists are not rendered — extend `renderMarkdown` if needed. Math is rendered via KaTeX (loaded from CDN in `index.html`): `$...$` for inline, `$$...$$` for display. The renderer protects math regions before applying other replacements so LaTeX backslashes and asterisks pass through unmangled.
 
 ## Data shapes
 

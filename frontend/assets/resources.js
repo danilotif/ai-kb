@@ -14,6 +14,12 @@
 
   function inline(s) {
     s = escapeHtml(s);
+    // protect math regions so subsequent replacements (italic *, code `, etc.) don't mangle LaTeX
+    const math = [];
+    s = s.replace(/(\$\$[^$]+\$\$|\$[^$\n]+\$)/g, (m) => {
+      math.push(m);
+      return `M${math.length - 1}`;
+    });
     s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
     s = s.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
@@ -21,6 +27,7 @@
     );
     s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     s = s.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
+    s = s.replace(/M(\d+)/g, (_, n) => math[parseInt(n, 10)]);
     return s;
   }
 
@@ -250,6 +257,15 @@
     article.innerHTML = renderMarkdown(found.file.content);
     content.appendChild(meta);
     content.appendChild(article);
+    if (window.renderMathInElement) {
+      window.renderMathInElement(article, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false },
+        ],
+        throwOnError: false,
+      });
+    }
     content.scrollTop = 0;
   }
 
