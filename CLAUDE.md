@@ -69,7 +69,7 @@ _(your notes here)_
 
 Categories are auto-discovered from `resources/*/` directory listings. Display names default to a slugified-back version (`local-models` → `Local models`); to override (e.g. `mcp` → `MCP`, `tips-and-tricks` → `Tips & tricks`), edit `resources/_categories.json`. Directories whose name starts with `.` or `_` are ignored, so the override file is invisible to the dashboard.
 
-Inside each category, the build script only walks `theory/` and `practice/` subfolders. Files placed at the category root (e.g. `resources/agents/foo.md`) still get picked up but are treated as `theory` with a stderr warning — move them into the right subfolder to silence it. The current categories (17 in total): `agents`, `coding-agents`, `data`, `evaluation`, `fine-tuning`, `foundations`, `local-models`, `mcp`, `multimodal`, `new-models`, `policy`, `prompt-engineering`, `reasoning`, `retrieval`, `safety`, `serving`, `tips-and-tricks`. New categories started 2026-05-01 (`coding-agents`, `data`, `multimodal`, `policy`, `prompt-engineering`, `reasoning`, `safety`, `serving`) ship with a single `theory/overview.md` placeholder for the user to expand.
+Inside each category, the build script only walks `theory/` and `practice/` subfolders. Files placed at the category root (e.g. `resources/agents/foo.md`) still get picked up but are treated as `theory` with a stderr warning — move them into the right subfolder to silence it. The current categories (17 in total): `agents`, `coding-agents`, `data`, `evaluation`, `fine-tuning`, `foundations`, `local-models`, `mcp`, `multimodal`, `new-models`, `policy`, `prompt-engineering`, `reasoning`, `retrieval`, `safety`, `serving`, `tips-and-tricks`. As of 2026-05-02, every category has at least 2–5 sketched docs (section outlines with italic placeholders) ready to be filled in with study content; only `local-models/` has substantive prose so far.
 
 After editing any markdown in `resources/`, regenerate the index from the repo root:
 
@@ -113,9 +113,10 @@ The minimal markdown subset rendered by `frontend/assets/resources.js` covers `#
 ## Backlog / not yet done
 - No search box (across the KB or news).
 - Two-level hierarchy only (category → theory|practice → document). Going deeper would require changes in the build script and the sidebar renderer.
-- Several new categories are stubs (`coding-agents`, `data`, `multimodal`, `policy`, `prompt-engineering`, `reasoning`, `safety`, `serving`) — only contain a placeholder `theory/overview.md`. Fill with study content over time.
-- `prompt-engineering` overlaps with `tips-and-tricks/practice/prompt-patterns.md`; consider moving the file into `prompt-engineering/practice/` once it grows.
-- `new-models/theory/frontier-evals.md` overlaps with `evaluation/`; consider consolidating.
+- Most KB docs (everything outside `local-models/`) are *sketched* — section outlines with italic placeholders, no real prose. Convert to study content over time.
+- `prompt-engineering` overlaps with `tips-and-tricks/practice/prompt-patterns.md`; the latter is now scoped as a practical cheat sheet pointing at the deeper taxonomy under `prompt-engineering/`. Consolidate further if it stays redundant.
+- `new-models/theory/frontier-evals.md` overlaps with `evaluation/theory/benchmark-saturation.md`; keep `frontier-evals` as the "current snapshot" view and `benchmark-saturation` as the methodology.
+- `foundations/theory/embeddings.md` and `retrieval/practice/vector-stores.md` together cover the "embeddings" topic from theory + practice angles; `retrieval/theory/rag.md` points at the foundations page rather than duplicating.
 - No tests.
 - `/update-news` is unscheduled — runs only on demand.
 
