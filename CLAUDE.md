@@ -7,7 +7,7 @@ A personal, static dashboard with two halves: a synthesized AI **News** briefing
 
 ```
 resources/        knowledge base — markdown source of truth (per category)
-frontend/         static dashboard (HTML, JS, CSS, generated data, build script)
+docs/         static dashboard (HTML, JS, CSS, generated data, build script)
 CLAUDE.md         this file
 README.md         user-facing intro
 .claude/          slash command specs (e.g. /update-news)
@@ -17,17 +17,21 @@ README.md         user-facing intro
 That's the whole repo. Anything else (build artifacts, IDE configs, etc.) should be gitignored.
 
 ## Architecture
-- **Static HTML** at serve time — no dependencies, no framework. Open `frontend/index.html` directly or serve `frontend/` with any static host. There is one offline build step (`frontend/scripts/build-resources.py`) that converts the `resources/` markdown tree into `frontend/data/resources.js` so the dashboard can read it under `file://`; the user runs this manually after editing markdown.
+- **Static HTML** at serve time — no dependencies, no framework. Open `docs/index.html` directly or serve `docs/` with any static host. There is one offline build step (`docs/scripts/build-resources.py`) that converts the `resources/` markdown tree into `docs/data/resources.js` so the dashboard can read it under `file://`; the user runs this manually after editing markdown.
 - **Two views, navbar-switched**:
-  - **News** (default): synthesized briefing rendered from `frontend/data/news.js`.
+  - **News** (default): synthesized briefing rendered from `docs/data/news.js`.
   - **Knowledge Base**: a sidebar file-tree (category → theory|practice → documents) with the selected document's markdown rendered in the main pane.
 - **Routing**: hash-based with `pushState`/`popstate`. URL forms: `` (news), `#resources`, `#resources/<category-slug>/<kind>/<file-slug>` where `<kind>` is `theory` or `practice` (deep link to a specific document).
 - **Code split into IIFE modules** under `window.App`, loaded via plain `<script>` tags in load order: util → resources/briefing → app.
-- **News refresh** via `/update-news` slash command (see `.claude/commands/update-news.md`) — Claude reads the web, synthesizes 4–8 themed candidate stories, and merges them into `frontend/data/news.js`: candidates that cover the same underlying news as an existing story extend it (new sources appended, body rewritten, date bumped); genuinely new candidates are prepended. Every story is durable — nothing is discarded automatically. News does **not** mirror into `resources/` — news and KB are separate concerns.
+- **News refresh** via `/update-news` slash command (see `.claude/commands/update-news.md`) — Claude reads the web, synthesizes 4–8 themed candidate stories, and merges them into `docs/data/news.js`: candidates that cover the same underlying news as an existing story extend it (new sources appended, body rewritten, date bumped); genuinely new candidates are prepended. Every story is durable — nothing is discarded automatically. News does **not** mirror into `resources/` — news and KB are separate concerns.
 
-## frontend/ map
+## docs/ map
+
+The dashboard lives in `docs/` so GitHub Pages can serve it directly (Pages is configured to build from the `main` branch, `/docs` directory). Locally, just open `docs/index.html` in a browser; remotely, the same files are served at <https://danilotif.github.io/ai-kb/>.
+
+
 ```
-frontend/
+docs/
   index.html                  page structure (hero + nav, news view, resources view with sidebar+content);
                               uses data-config / data-config-html attrs as placeholders, populated from window.CONFIG on load
   assets/
@@ -41,7 +45,7 @@ frontend/
     resources.js              GENERATED KB index (window.RESOURCES) — tree + content baked in for file:// support
     news.js                   news stories (window.NEWS) — durable; refreshed via /update-news (extends overlapping stories, prepends new ones)
   scripts/
-    build-resources.py        regenerates frontend/data/resources.js by scanning ../resources/<cat>/<theory|practice>/*.md (stdlib only)
+    build-resources.py        regenerates docs/data/resources.js by scanning ../resources/<cat>/<theory|practice>/*.md (stdlib only)
 ```
 
 ## resources/ knowledge base
@@ -73,11 +77,11 @@ Inside each category, the build script only walks `theory/` and `practice/` subf
 
 After editing any markdown in `resources/`, regenerate the index from the repo root:
 
-    python3 frontend/scripts/build-resources.py
+    python3 docs/scripts/build-resources.py
 
-This rewrites `frontend/data/resources.js`. The script is stdlib-only, runs in <100ms. The dashboard cannot `fetch()` markdown from `file://`, which is why this offline bake step exists. Alternative: ask Claude to "rebuild the KB index" — same output, different mechanism.
+This rewrites `docs/data/resources.js`. The script is stdlib-only, runs in <100ms. The dashboard cannot `fetch()` markdown from `file://`, which is why this offline bake step exists. Alternative: ask Claude to "rebuild the KB index" — same output, different mechanism.
 
-The minimal markdown subset rendered by `frontend/assets/resources.js` covers `# H1`, `## H2`, paragraphs, unordered lists with `- `, links, inline code, bold (`**...**`), italic (`*...*`). Tables, blockquotes, images, and ordered lists are not rendered — extend `renderMarkdown` if needed. Math is rendered via KaTeX (loaded from CDN in `index.html`): `$...$` for inline, `$$...$$` for display. The renderer protects math regions before applying other replacements so LaTeX backslashes and asterisks pass through unmangled.
+The minimal markdown subset rendered by `docs/assets/resources.js` covers `# H1`, `## H2`, paragraphs, unordered lists with `- `, links, inline code, bold (`**...**`), italic (`*...*`). Tables, blockquotes, images, and ordered lists are not rendered — extend `renderMarkdown` if needed. Math is rendered via KaTeX (loaded from CDN in `index.html`): `$...$` for inline, `$$...$$` for display. The renderer protects math regions before applying other replacements so LaTeX backslashes and asterisks pass through unmangled.
 
 ## Data shapes
 
@@ -100,14 +104,14 @@ The minimal markdown subset rendered by `frontend/assets/resources.js` covers `#
 - Dark theme only.
 - News and KB are separate concerns, but both are durable: `/update-news` extends overlapping stories rather than discarding them, so the news log accumulates over time alongside the KB.
 - Two-level hierarchy: category → theory|practice → document. Theory holds explanatory/reference notes; practice holds recipes, commands, and how-to docs. The split is enforced by the build script.
-- Top level is intentionally minimal: `resources/`, `frontend/`, `CLAUDE.md`, `README.md`. New top-level entries should be a deliberate decision, not accidental sprawl.
+- Top level is intentionally minimal: `resources/`, `docs/`, `CLAUDE.md`, `README.md`. New top-level entries should be a deliberate decision, not accidental sprawl.
 
 ## /update-news workflow
 1. User runs `/update-news` in Claude Code.
-2. Claude reads current `frontend/data/news.js`, notes existing stories (headline, body, sources, date).
+2. Claude reads current `docs/data/news.js`, notes existing stories (headline, body, sources, date).
 3. Claude fetches news from configured sources (Anthropic, OpenAI, DeepMind, HF, Mistral, arXiv cs.CL/cs.AI, HN AI threads, tech press) and synthesizes 4–8 themed candidate stories.
 4. For each candidate, Claude decides: same news as an existing story → extend it (rewrite body, append new sources, bump date to `max`); genuinely new news → prepend as a new story. Untouched existing stories stay verbatim.
-5. Claude rewrites `frontend/data/news.js`, sorted by date desc. No automatic discard, no auto/manual distinction, no hard cap (Claude flags if the list passes ~20).
+5. Claude rewrites `docs/data/news.js`, sorted by date desc. No automatic discard, no auto/manual distinction, no hard cap (Claude flags if the list passes ~20).
 6. User reviews diff, commits, pushes.
 
 ## Backlog / not yet done
@@ -121,18 +125,18 @@ The minimal markdown subset rendered by `frontend/assets/resources.js` covers `#
 - `/update-news` is unscheduled — runs only on demand.
 
 ## Conventions
-- KB documents are edited as markdown under `resources/<category>/<theory|practice>/<slug>.md`. After editing, run `python3 frontend/scripts/build-resources.py`.
-- News is hand-edited in `frontend/data/news.js` or refreshed via `/update-news`; both flows produce the same shape (no auto/manual distinction). `/update-news` extends overlapping stories instead of replacing them.
+- KB documents are edited as markdown under `resources/<category>/<theory|practice>/<slug>.md`. After editing, run `python3 docs/scripts/build-resources.py`.
+- News is hand-edited in `docs/data/news.js` or refreshed via `/update-news`; both flows produce the same shape (no auto/manual distinction). `/update-news` extends overlapping stories instead of replacing them.
 - Adding a new category = `mkdir -p resources/<slug>/{theory,practice}` and drop at least one `.md` file into one of them (otherwise the category won't appear in the sidebar). Override the display name in `resources/_categories.json` if the slug doesn't title-case nicely.
 - The `slug` shown in the sidebar is the filename stem (e.g. `transformers.md` → `transformers`), so name files for what they should display.
 - Decide theory vs practice by audience need: theory = "I want to understand X" (concepts, derivations, reference). Practice = "I want to do X" (commands, recipes, workflows, tool how-tos).
 
 ## Forking this for a new domain
-The framework (`frontend/`, build script, KB tree viewer) is domain-agnostic. To repurpose for marketing/games/finance/anything:
-1. Edit `frontend/data/config.js` — set `siteName`, `pageTitle`, tab labels and headings, footer.
+The framework (`docs/`, build script, KB tree viewer) is domain-agnostic. To repurpose for marketing/games/finance/anything:
+1. Edit `docs/data/config.js` — set `siteName`, `pageTitle`, tab labels and headings, footer.
 2. Replace `resources/*/` content with your domain's markdown.
 3. Update `resources/_categories.json` if your slugs need pretty display names.
-4. Rewrite `.claude/commands/update-news.md` for your domain (or add a new command, e.g. `/update-trends`) — change the source list and theme slots; the rest of the workflow (synthesize themed stories, write to `frontend/data/news.js`) stays the same.
-5. Run `python3 frontend/scripts/build-resources.py`.
+4. Rewrite `.claude/commands/update-news.md` for your domain (or add a new command, e.g. `/update-trends`) — change the source list and theme slots; the rest of the workflow (synthesize themed stories, write to `docs/data/news.js`) stays the same.
+5. Run `python3 docs/scripts/build-resources.py`.
 
 Nothing else in the framework should need editing.
